@@ -1,5 +1,9 @@
 export class CreateClientDto {
-	nombre: string;
-	email: string;
-	telefono: string;
+  fullName: string;
+  idNumber: string;
+  email: string;
+  phone: string;
+  emergencyPhone: string;
+  address: string;
+  age: number;
 }
