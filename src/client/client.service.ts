@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Client } from './entities/client.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,9 +12,16 @@ export class ClientService {
     private clientRepository: Repository<Client>,
   ) {}
 
-  create(createClientDto: CreateClientDto) {
-    const client = this.clientRepository.create(createClientDto);
-    return this.clientRepository.save(client);
+  async create(createClientDto: CreateClientDto) {
+    try {
+      const client = this.clientRepository.create(createClientDto);
+      return await this.clientRepository.save(client);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
+      throw new InternalServerErrorException('Error al crear el cliente');
+    }
   }
 
   findAll() {
