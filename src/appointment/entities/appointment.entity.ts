@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Room } from '../../room/entities/room.entity';
 import { Client } from 'src/client/entities/client.entity';
+import { NoAttendanceStatus } from '../enums/attendance_status.enum';
 
 @Entity()
 export class Appointment {
@@ -18,6 +19,13 @@ export class Appointment {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @Column({
+    type: 'enum',
+    enum: NoAttendanceStatus,
+    default: NoAttendanceStatus.PENDING,
+  })
+  attendanceStatus: NoAttendanceStatus;
 
   @ManyToOne(() => Room, (room) => room.appointments)
   @JoinColumn({ name: 'roomId' })
