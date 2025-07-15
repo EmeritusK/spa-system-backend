@@ -4,16 +4,21 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { IdNumberValidatorService } from 'src/validations/client/id-number-validator.service';
 
 @Injectable()
 export class ClientService {
   constructor(
     @InjectRepository(Client)
     private clientRepository: Repository<Client>,
+    private idNumberValidatorService: IdNumberValidatorService,
   ) {}
 
   async create(createClientDto: CreateClientDto) {
     try {
+      if (!this.idNumberValidatorService.validate(createClientDto.idNumber)) {
+        throw new BadRequestException('Número de identificación inválido');
+      }
       const client = this.clientRepository.create(createClientDto);
       return await this.clientRepository.save(client);
     } catch (error) {
