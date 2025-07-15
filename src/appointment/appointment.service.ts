@@ -13,15 +13,21 @@ export class AppointmentService {
   ) {}
 
   create(createAppointmentDto: CreateAppointmentDto) {
-    return this.appointmentRepository.save(createAppointmentDto);
+    const { roomId, clientId, ...rest } = createAppointmentDto;
+    const appointment = {
+      ...rest,
+      room: { id: roomId },
+      client: { id: clientId },
+    };
+    return this.appointmentRepository.save(appointment);
   }
 
   findAll() {
-    return this.appointmentRepository.find();
+    return this.appointmentRepository.find({ relations: ['client', 'room'] });
   }
 
   findOne(id: number) {
-    return this.appointmentRepository.findOne({ where: { id } });
+    return this.appointmentRepository.findOne({ where: { id }, relations: ['client', 'room'] });
   }
 
   update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
