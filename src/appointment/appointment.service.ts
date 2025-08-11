@@ -43,11 +43,15 @@ export class AppointmentService {
   }
 
   findAll() {
-    return this.appointmentRepository.find({ relations: ['client', 'room'] });
+    const appointments = this.appointmentRepository.find({ relations: ['client', 'room'] });
+    console.log('Appointments found:', appointments);
+    return appointments;
   }
 
   findOne(id: number) {
-    return this.appointmentRepository.findOne({ where: { id }, relations: ['client', 'room'] });
+    const appointment = this.appointmentRepository.findOne({ where: { id }, relations: ['client', 'room'] });
+    console.log('Appointment found:', appointment);
+    return appointment;
   }
 
   update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
