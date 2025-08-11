@@ -7,6 +7,7 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Client } from '../client/entities/client.entity';
 import { Room } from '../room/entities/room.entity';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { UpdateCommentsDto } from './dto/update-comments.dto';
 import { NoAttendanceStatus } from './enums/attendance_status.enum';
 
 @Injectable()
@@ -66,6 +67,16 @@ export class AppointmentService {
       throw new BadRequestException('Estado de asistencia inválido');
     }
     appointment.attendanceStatus = updateAttendanceDto.attendanceStatus;
+    return this.appointmentRepository.save(appointment);
+  }
+
+  async updateComments(id: number, updateCommentsDto: UpdateCommentsDto) {
+    const appointment = await this.appointmentRepository.findOne({ where: { id } });
+    if (!appointment) {
+      throw new BadRequestException('La cita no existe');
+    }
+    
+    appointment.comments = updateCommentsDto.comments;
     return this.appointmentRepository.save(appointment);
   }
 }

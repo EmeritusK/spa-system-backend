@@ -5,6 +5,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { AppointmentService } from './appointment.service';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { UpdateCommentsDto } from './dto/update-comments.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('appointment')
@@ -52,5 +53,23 @@ export class AppointmentController {
   @Patch(':id/attendance')
   updateAttendance(@Param('id') id: string, @Body() updateAttendanceDto: UpdateAttendanceDto) {
     return this.appointmentService.updateAttendance(+id, updateAttendanceDto);
+  }
+
+  //Actualizar comentarios de la cita
+  @ApiOperation({ summary: 'Actualizar los comentarios de una cita' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la cita' })
+  @ApiBody({
+    type: UpdateCommentsDto,
+    examples: {
+      ejemplo: {
+        summary: 'Ejemplo de comentarios',
+        value: { comments: 'El cliente solicitó un masaje relajante' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Comentarios actualizados correctamente' })
+  @Patch(':id/comments')
+  updateComments(@Param('id') id: string, @Body() updateCommentsDto: UpdateCommentsDto) {
+    return this.appointmentService.updateComments(+id, updateCommentsDto);
   }
 }

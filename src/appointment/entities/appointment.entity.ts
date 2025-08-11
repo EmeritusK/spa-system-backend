@@ -27,6 +27,9 @@ export class Appointment {
   })
   attendanceStatus: NoAttendanceStatus;
 
+  @Column({ type: 'text', nullable: true })
+  comments: string;
+
   @ManyToOne(() => Room, (room) => room.appointments)
   @JoinColumn({ name: 'roomId' })
   room: Room;
