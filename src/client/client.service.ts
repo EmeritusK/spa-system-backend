@@ -29,19 +29,62 @@ export class ClientService {
     }
   }
 
-  findAll() {
-    return this.clientRepository.find();
+  async findAll() {
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Executing findAll query`);
+    const clients = await this.clientRepository.find();
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Found ${clients.length} clients`);
+    return clients;
   }
 
-  findOne(id: number) {
-    return this.clientRepository.findOne({ where: { id } });
+  async findOne(id: number) {
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Executing findOne query for ID: ${id}`);
+    const client = await this.clientRepository.findOne({ where: { id } });
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Client found:`, client ? 'YES' : 'NO');
+    return client;
   }
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return this.clientRepository.update(id, updateClientDto);
+  async update(id: number, updateClientDto: UpdateClientDto) {
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Updating client ID: ${id}`);
+    const result = await this.clientRepository.update(id, updateClientDto);
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Update result:`, result);
+    return result;
   }
 
-  remove(id: number) {
-    return this.clientRepository.delete(id);
+  async remove(id: number) {
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Attempting to delete client ID: ${id}`);
+    
+    // Verificar que el cliente existe antes de eliminarlo
+    const existingClient = await this.clientRepository.findOne({ where: { id } });
+    if (!existingClient) {
+      console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Client ID ${id} not found`);
+      throw new BadRequestException('Cliente no encontrado');
+    }
+    
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Client exists, proceeding with deletion`);
+    
+    // Eliminar el cliente
+    const result = await this.clientRepository.delete(id);
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Delete result:`, result);
+    
+    // Verificar que realmente se eliminó
+    if (result.affected === 0) {
+      console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] Failed to delete client ID: ${id}`);
+      throw new InternalServerErrorException('Error al eliminar el cliente');
+    }
+    
+    // Verificar que ya no existe en la base de datos
+    const deletedClient = await this.clientRepository.findOne({ where: { id } });
+    if (deletedClient) {
+      console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] WARNING: Client ID ${id} still exists after deletion!`);
+      throw new InternalServerErrorException('Error: El cliente sigue existiendo después de la eliminación');
+    }
+    
+    console.log(`[${new Date().toISOString()}] [CLIENT-SERVICE] SUCCESS: Client ID ${id} successfully deleted and verified`);
+    return { 
+      message: 'Cliente eliminado exitosamente',
+      deletedId: id,
+      timestamp: new Date().toISOString(),
+      verification: 'Data deletion confirmed'
+    };
   }
 }
