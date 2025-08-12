@@ -5,6 +5,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
+
   const config = new DocumentBuilder()
     .setTitle('SPA System API')
     .setDescription('Documentación de la API para el sistema de SPA')
