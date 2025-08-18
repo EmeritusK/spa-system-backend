@@ -96,13 +96,8 @@ export class AppointmentService {
       throw new BadRequestException('La cita no existe');
     }
 
-    // Verificar que la nueva fecha no sea en el pasado
+    // Convertir la nueva fecha
     const newDateTime = new Date(rescheduleDto.dateTime);
-    const now = new Date();
-    
-    if (newDateTime <= now) {
-      throw new BadRequestException('La nueva fecha y hora debe ser en el futuro');
-    }
 
     // Verificar disponibilidad de la sala en la nueva fecha/hora
     const conflictingAppointment = await this.appointmentRepository
