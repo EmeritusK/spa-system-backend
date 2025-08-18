@@ -6,6 +6,7 @@ import { AppointmentService } from './appointment.service';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { UpdateCommentsDto } from './dto/update-comments.dto';
+import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('appointment')
@@ -71,5 +72,35 @@ export class AppointmentController {
   @Patch(':id/comments')
   updateComments(@Param('id') id: string, @Body() updateCommentsDto: UpdateCommentsDto) {
     return this.appointmentService.updateComments(+id, updateCommentsDto);
+  }
+
+  //Reprogramar cita (cambiar fecha y hora)
+  @ApiOperation({ summary: 'Reprogramar una cita cambiando su fecha y hora' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la cita a reprogramar' })
+  @ApiBody({
+    type: RescheduleAppointmentDto,
+    examples: {
+      reprogramar: {
+        summary: 'Ejemplo de reprogramación',
+        value: { dateTime: '2024-01-20T15:30:00Z' },
+      },
+    },
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Cita reprogramada exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Cita reprogramada exitosamente' },
+        appointment: { type: 'object' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Fecha inválida o sala no disponible' })
+  @ApiResponse({ status: 404, description: 'Cita no encontrada' })
+  @Patch(':id/reschedule')
+  rescheduleAppointment(@Param('id') id: string, @Body() rescheduleDto: RescheduleAppointmentDto) {
+    return this.appointmentService.rescheduleAppointment(+id, rescheduleDto);
   }
 }

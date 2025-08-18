@@ -8,6 +8,7 @@ import { Client } from '../client/entities/client.entity';
 import { Room } from '../room/entities/room.entity';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { UpdateCommentsDto } from './dto/update-comments.dto';
+import { RescheduleAppointmentDto } from './dto/reschedule-appointment.dto';
 import { NoAttendanceStatus } from './enums/attendance_status.enum';
 
 @Injectable()
@@ -82,5 +83,48 @@ export class AppointmentService {
     
     appointment.comments = updateCommentsDto.comments;
     return this.appointmentRepository.save(appointment);
+  }
+
+  async rescheduleAppointment(id: number, rescheduleDto: RescheduleAppointmentDto) {
+    // Verificar que la cita existe
+    const appointment = await this.appointmentRepository.findOne({ 
+      where: { id }, 
+      relations: ['room', 'client'] 
+    });
+    
+    if (!appointment) {
+      throw new BadRequestException('La cita no existe');
+    }
+
+    // Verificar que la nueva fecha no sea en el pasado
+    const newDateTime = new Date(rescheduleDto.dateTime);
+    const now = new Date();
+    
+    if (newDateTime <= now) {
+      throw new BadRequestException('La nueva fecha y hora debe ser en el futuro');
+    }
+
+    // Verificar disponibilidad de la sala en la nueva fecha/hora
+    const conflictingAppointment = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('appointment.room.id = :roomId', { roomId: appointment.room.id })
+      .andWhere('appointment.id != :appointmentId', { appointmentId: id })
+      .andWhere('appointment.dateTime = :newDateTime', { newDateTime: newDateTime })
+      .getOne();
+
+    if (conflictingAppointment) {
+      throw new BadRequestException('La sala no está disponible en la fecha y hora especificada');
+    }
+
+    // Actualizar la fecha y hora de la cita
+    appointment.dateTime = newDateTime;
+    
+    // Guardar los cambios
+    const updatedAppointment = await this.appointmentRepository.save(appointment);
+    
+    return {
+      message: 'Cita reprogramada exitosamente',
+      appointment: updatedAppointment
+    };
   }
 }
