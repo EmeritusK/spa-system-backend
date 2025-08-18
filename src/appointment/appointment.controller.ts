@@ -97,7 +97,7 @@ export class AppointmentController {
       }
     }
   })
-  @ApiResponse({ status: 400, description: 'Fecha inválida o sala no disponible' })
+  @ApiResponse({ status: 400, description: 'Sala no disponible en la fecha especificada' })
   @ApiResponse({ status: 404, description: 'Cita no encontrada' })
   @Patch(':id/reschedule')
   rescheduleAppointment(@Param('id') id: string, @Body() rescheduleDto: RescheduleAppointmentDto) {
